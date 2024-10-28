@@ -10,6 +10,12 @@ widgets = {
 }
 
 
+
+def buttonClicked(x):
+    x.setStyleSheet("""background-color:orange;
+                           border-radius:25px;""")
+    
+
 app = QApplication(sys.argv)
 
 
@@ -29,7 +35,7 @@ window.setWindowTitle("Nordic Keyboard Converter")
 window.setFixedWidth(500)
 window.setFixedHeight(200)
 
-window.setStyleSheet("background:white;")
+window.setStyleSheet("background:black;")
 window.setWindowIcon(QtGui.QIcon('nordic.png'))
 grid = QGridLayout()
 window.setLayout(grid)
@@ -50,6 +56,7 @@ svg_widget1 = QtSvg.QSvgWidget("../General assets/umlaut caps A.svg")
 svg_widget2 = QtSvg.QSvgWidget("../General assets/umlaut caps O.svg")
 svg_widget3 = QtSvg.QSvgWidget("../General assets/umlaut lower a.svg")
 svg_widget4 = QtSvg.QSvgWidget("../General assets/umlaut lower o.svg")
+svg_widget1.setStyleSheet("""border-radius:25px;""")
 
 
 grid.addWidget(svg_widget1, 1,0)
@@ -62,7 +69,28 @@ label1 = QLabel("alt+shft+A")
 label2 = QLabel("alt+shft+O")
 label3 = QLabel("alt+A")
 label4 = QLabel("alt+O")
-label1.setStyleSheet("background-color:white;")
+
+label1.setAlignment(QtCore.Qt.AlignCenter)
+label2.setAlignment(QtCore.Qt.AlignCenter)
+label3.setAlignment(QtCore.Qt.AlignCenter)
+label4.setAlignment(QtCore.Qt.AlignCenter)
+
+label1.setStyleSheet("""color:white;""")
+label2.setStyleSheet("""color:white;""")
+label3.setStyleSheet("""color:white;""")
+label4.setStyleSheet("""color:white;""")
+
+
+
+
+
+#test button
+
+button = QPushButton("CLICK")
+button.clicked.connect(buttonClicked())
+button.setStyleSheet("color:white")
+grid.addWidget(button, 0,0)
+
 
 
 
