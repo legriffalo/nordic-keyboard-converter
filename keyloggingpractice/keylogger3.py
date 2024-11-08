@@ -1,7 +1,7 @@
 import keyboard as k
-from pynput.keyboard import Key, Controller
+# from pynput.keyboard import Key, Controller
 
-keyboard = Controller()
+# keyboard = Controller()
 
 while True:
     event = k.read_event()
