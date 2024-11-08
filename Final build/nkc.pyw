@@ -8,33 +8,54 @@ import ctypes
 from PyQt5.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QWidget, QGridLayout, QMainWindow
 from PyQt5.QtGui import QPixmap
 from PyQt5 import QtGui, QtCore, QtSvg
+from PyQt5.QtCore import Qt
 
 
 
 # Function for initialising keyboard ( will be thread 1)
 def start_keyboard():
+    global highlightTarget
+    global gettable 
+    global window
+    
     while True:
-        event = k.read_event()
         
-        if k.is_pressed('alt'):
-            
+        
+        event = k.read_event()
+        # used to check key names
+        print(event)
+        if k.is_pressed('alt') and k.is_pressed("left windows"):
+            # window.setWindowFlags(window.windowFlags() | Qt.WindowStaysOnTopHint)
+            window.is_topmost = True
+            window.show()
+
+            print("window should be upfront")  
+        
             if k.is_pressed('shift'):
                 if k.is_pressed('a'):
                     k.write("Ä",exact = True)
+                    highlightTarget = gettable[0]
                 if k.is_pressed('o'):
                     k.write("Ö",exact = True)
+                    highlightTarget = gettable[1]
+
             else:
                 if k.is_pressed('a'):
                     k.write("ä",exact = True)
+                    highlightTarget = gettable[2]
+
                 if k.is_pressed('o'):
                     k.write("ö",exact = True)
+                    highlightTarget = gettable[3]
+
 
 
 
 # function for listening for style changes (will be thread 2)
 def highlight_listener():
     while True:
-        if highlightTarget:
+        global highlightTarget
+        if highlightTarget !='':
             make_highlight(highlightTarget)
             highlightTarget = ''
         t.sleep(0.5)
@@ -53,7 +74,7 @@ def make_highlight(target):
 # function to build widget
 def build_widget(assetsFolderPath):
     app = QApplication(sys.argv)
-    mainwindow = QMainWindow()
+    # mainwindow = QMainWindow()
 
     app.setWindowIcon(QtGui.QIcon(f'{assetsFolderPath}/nordic.ico'))
     # mainwindow.setWindowIcon(QtGui.QIcon('nordic1.ico'))
@@ -128,8 +149,11 @@ def build_widget(assetsFolderPath):
     grid.addWidget(svg_widget2, 1,1)
     grid.addWidget(svg_widget3, 1,2)
     grid.addWidget(svg_widget4, 1,3)
+    
+    gettable = [svg_widget1, svg_widget2, svg_widget3, svg_widget4]
+    
 
-    return app,window
+    return app,window, gettable
 
 
 
@@ -137,10 +161,13 @@ def build_widget(assetsFolderPath):
 myappid = 'nordic.keyboard.converter.version1.1' # arbitrary version string
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
+#start build GUI
+app,window,gettable = build_widget('./assets')
+
 
 # set global variables for interthread comms #
     # Will be set to name of svgs to highlight key in use
-highlightTarget = ''
+highlightTarget = gettable[0]
 
     # Requested will allow buttons in app window to contact keyboard
 requested = 'ä'
@@ -152,8 +179,7 @@ styleChanges = threading.Thread(target=highlight_listener, daemon=True)
 keyStrokes.start()
 styleChanges.start()
 
-#start build GUI
-app,window = build_widget('./assets')
+
 
 # show GUI window
 window.show()
