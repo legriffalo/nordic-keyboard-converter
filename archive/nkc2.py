@@ -1,0 +1,293 @@
+# import all packages
+import keyboard
+import sys
+import threading
+import time as t
+import ctypes
+import win32gui
+import win32con
+import pywinauto
+import pyautogui
+
+#import pyperclip
+from PyQt5.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QWidget, QGridLayout, QMainWindow
+from PyQt5.QtGui import QPixmap
+from PyQt5 import QtGui, QtCore, QtSvg
+from PyQt5.QtCore import Qt
+
+    
+def send_key(event):
+    if event.event_type == 'down':
+        keyboard.press(event.name)
+    else:
+        keyboard.release(event.name)
+    
+    return 1
+
+def on_key_event(event):
+    # global flag
+    global keysDown
+    # global mainFlag
+    global hot # hotkey combo active 
+    global shiftDown
+    global gettable
+    global highlightTarget
+
+    
+    check = ["alt", "caps lock"]
+    print(f"start {event.name}",["shiftdown",shiftDown],["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
+
+    try:
+        # kill key for testing 
+        # if event.name == "esc":
+        #     print("esc pressed")
+        #     # mainFlag = False
+        #     # flag = False
+        #     keyboard.unhook_all()
+        #     return False
+        
+        if set(keysDown)== {'alt', 'caps lock'}:
+            hot = True
+            
+        #when keys are pressed
+        if event.event_type == "down":
+            if event.name =="shift":
+                shiftDown = True
+            
+            #if a key is part of a hotkey combo avoid triggering key press immediately
+            if event.name in check and event.name not in keysDown:
+                keysDown.append(event.name)
+                return 
+            
+            
+                
+                      
+            #combos to give letters
+            if event.name =="A" and shiftDown and hot:
+                print("should print some umlaut a stuff")
+                keyboard.write("Ä")
+                highlightTarget = gettable[0]
+
+                return
+            elif event.name == "O"  and shiftDown and hot:
+                print("should print some umlaut o stuff") 
+                keyboard.write("Ö") 
+                highlightTarget = gettable[1]
+                return
+            elif event.name == "a" and hot:
+                print("should print some (L) umlaut a stuff")
+                keyboard.write("ä")
+                highlightTarget = gettable[2]
+
+                return
+            elif event.name == "o" and hot:
+                print("should print some (L) umlaut o stuff") 
+                keyboard.write("ö") 
+                highlightTarget = gettable[3]
+
+                return
+                
+            # other elifs in here 
+            else:
+                send_key(event)
+                
+        
+        # when keys are lifted
+        # suppress if hotkey was active             
+        if event.event_type == "up":
+            if event.name =="shift":
+                shiftDown = False
+                
+            if event.name in check:
+
+                if hot and keysDown:
+                    print("should avoid triggering normal behaviour")
+                    # print(["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
+
+                    keysDown.remove(event.name)
+                    if len(keysDown)==0:
+                        hot = False
+                    print(["shiftdown",shiftDown],["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
+
+                    return
+                
+                else: 
+                    keysDown.remove(event.name)
+
+                    keyboard.press(event.name)
+                    keyboard.release(event.name)
+                    
+                    # send_key(event)
+            else:
+                send_key(event)       
+
+    except Exception as error:
+        print(error)
+        mainFlag = False
+    print("end",["shiftdown",shiftDown],["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
+
+
+# Function for initialising keyboard ( will be thread 1)
+def start_keyboard():
+    # flag = True
+    # print("starting keyboard blocker")
+    keyboard.hook(on_key_event, suppress=True)
+    
+    # while flag:
+    #     t.sleep(0.1)
+
+    #     continue
+    # keyboard.unhook_all()
+
+
+# function for listening for style changes (will be thread 2)
+def highlight_listener():
+    while True:
+        global highlightTarget
+        if highlightTarget !='':
+            make_highlight(highlightTarget)
+            highlightTarget = ''
+        t.sleep(0.2)
+    return "style change process terminated"  
+        
+# funciton to make style changes 
+def make_highlight(target):
+    global window
+    
+    target.setStyleSheet("""background-color:orange;border-radius:25px;""")
+           
+    t.sleep(1)
+    target.setStyleSheet("""background-color:none;""")
+    
+    return "highlighted"
+
+    
+
+   
+# function to build widget
+def build_widget(assetsFolderPath):
+    app = QApplication(sys.argv)
+    # mainwindow = QMainWindow()
+
+    app.setWindowIcon(QtGui.QIcon(f'{assetsFolderPath}/nordic.ico'))
+    # mainwindow.setWindowIcon(QtGui.QIcon('nordic1.ico'))
+    
+#could be useful to transition to tray application
+
+    # trayIcon = QSystemTrayIcon(QtGui.QIcon('nordic.png'), parent = app)
+    # trayIcon.setToolTip("Nordic is here bebe")
+    # trayIcon.show()
+
+    # check monitor size to place window in bottom right 
+    screen = app.primaryScreen()
+    print('Screen: %s' % screen.name())
+    size = screen.size()
+    print('Size: %d x %d' % (size.width(), size.height()))
+    rect = screen.availableGeometry()
+    print('Available: %d x %d' % (rect.width(), rect.height()))
+    
+    # values to put window in bottom right of primary display
+    xDisplacement = rect.width()-500
+    yDisplacement = rect.height()-250
+    
+    #create a widget called window in which to build GUI
+    window = QWidget()
+    window.setWindowTitle("NKC")
+    window.setFixedWidth(500)
+    window.setFixedHeight(200)
+    window.setStyleSheet("background:black;")
+
+    grid = QGridLayout()
+    window.setLayout(grid)
+
+    window.move(xDisplacement,yDisplacement)
+# not sure if needed so deactivated for now
+    # # display logo in  
+    # image = QPixmap("nordic.png")
+    # image = image.scaledToWidth(50)
+    # logo = QLabel()
+    # logo.setPixmap(image)
+    # grid.addWidget(logo, 0, 4)
+
+    # display svgs
+    svg_widget1 = QtSvg.QSvgWidget(f'{assetsFolderPath}/umlaut caps A.svg')
+    svg_widget2 = QtSvg.QSvgWidget(f'{assetsFolderPath}/umlaut caps O.svg')
+    svg_widget3 = QtSvg.QSvgWidget(f'{assetsFolderPath}/umlaut lower a.svg')
+    svg_widget4 = QtSvg.QSvgWidget(f'{assetsFolderPath}/umlaut lower o.svg')
+    svg_widget1.setStyleSheet("""border-radius:25px;""")
+
+
+    
+
+    # label with key commands
+    label1 = QLabel("alt+")
+    label2 = QLabel("alt+2")
+    label3 = QLabel("alt+A")
+    label4 = QLabel("alt+O")
+    label1.setAlignment(QtCore.Qt.AlignCenter)
+    label2.setAlignment(QtCore.Qt.AlignCenter)
+    label3.setAlignment(QtCore.Qt.AlignCenter)
+    label4.setAlignment(QtCore.Qt.AlignCenter)
+    label1.setStyleSheet("""color:white;""")
+    label2.setStyleSheet("""color:white;""")
+    label3.setStyleSheet("""color:white;""")
+    label4.setStyleSheet("""color:white;""")
+
+
+    grid.addWidget(label1, 2,0)
+    grid.addWidget(label2, 2,1)
+    grid.addWidget(label3, 2,2)
+    grid.addWidget(label4, 2,3)
+    grid.addWidget(svg_widget1, 1,0)
+    grid.addWidget(svg_widget2, 1,1)
+    grid.addWidget(svg_widget3, 1,2)
+    grid.addWidget(svg_widget4, 1,3)
+    
+    gettable = [svg_widget1, svg_widget2, svg_widget3, svg_widget4]
+    
+
+    return app,window, gettable
+
+
+
+# Make sure app ctype is set
+myappid = 'nordic.keyboard.converter.version1.1' # arbitrary version string
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+#start build GUI
+app,window,gettable = build_widget('./assets')
+
+
+# set global variables for interthread comms #
+    # Will be set to name of svgs to highlight key in use
+highlightTarget = gettable[0]
+
+    # Requested will allow buttons in app window to contact keyboard
+requested = 'ä'
+
+keysDown = []
+keysUp = []
+used = False
+hot = False
+upper = False
+shiftDown = False
+mainFlag = True
+
+# hot = False
+# upper = False
+    
+
+# start threads 
+keyStrokes = threading.Thread(target=start_keyboard, daemon=True)
+styleChanges = threading.Thread(target=highlight_listener, daemon=True)    
+
+keyStrokes.start()
+styleChanges.start()
+
+
+window.setWindowFlags(window.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)  
+
+# show GUI window
+window.show()
+# execute event loop of app as interpretter closes
+sys.exit(app.exec())
