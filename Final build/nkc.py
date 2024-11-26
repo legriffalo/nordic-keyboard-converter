@@ -87,7 +87,7 @@ def on_key_event(event):
     global highlightTarget
 
     
-    check = ["alt", "caps lock"]
+    check = ["ctrl", "caps lock"]
     print(f"start {event.name}",["shiftdown",shiftDown],["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
 
     try:
@@ -99,7 +99,7 @@ def on_key_event(event):
         #     keyboard.unhook_all()
         #     return False
         
-        if set(keysDown)== {'alt', 'caps lock'}:
+        if set(keysDown)== {'ctrl', 'caps lock'}:
             hot = True
             
         #when keys are pressed
