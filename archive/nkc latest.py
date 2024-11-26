@@ -6,13 +6,17 @@ import keyboard
 import pyperclip
 import time as t
 import ctypes
+# import win32gui
+# import win32con
+# import pywinauto
+# import pyautogui
 from PyQt5.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QWidget, QGridLayout
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5 import QtGui, QtCore
 
-"""resource path function taken from""" 
-"""https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file"""
+## resource path function taken from 
+#https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS2
@@ -22,7 +26,7 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-"""class to customise svg behaviour"""
+# class to customise svg behaviour
 class InteractiveSvgWidget(QSvgWidget):
     def __init__(self, svg_file, parent=None, char = None):
         self.char = char
@@ -39,30 +43,118 @@ class InteractiveSvgWidget(QSvgWidget):
         super().mousePressEvent(event)
         
     def highlight(self):
+        # Apply the red background
         self.setStyleSheet("""
             background-color: red;
             border-radius: 25px;
         """)
         
-        """ Create a single-shot timer to revert the style after 1 second """
+        # Create a single-shot timer to revert the style after 1 second
         QTimer.singleShot(1000, lambda: self.setStyleSheet("""
             background-color: transparent;
             border-radius: 25px;
         """))
-
-# def send_key(event):
-#     if event.event_type == 'down':
-#         keyboard.press(event.name)
-#     else:
-#         keyboard.release(event.name)
+        
+        # self.unhighlight()
     
-#     return 1
+    # def unhighlight(self):
+    #     t.sleep(1)
+    #     print ("1s delay???")
+    #     self.setStyleSheet("""
+    #             background-color: transparent;
+    #             border-radius: 25px;
+    #         """)
+        
+
+
+
+    
+def send_key(event):
+    if event.event_type == 'down':
+        keyboard.press(event.name)
+    else:
+        keyboard.release(event.name)
+    
+    return 1
+
+#attempt by amazon Q
+# def on_key_event(event):
+#     global keysDown
+#     global hot
+#     global shiftDown
+#     global gettable
+#     global highlightTarget
+    
+#     check = ["alt", "caps lock"]
+    
+#     try:
+#         # Only handle specific hotkey combinations, let others pass through
+#         if set(keysDown) == {'alt', 'caps lock'}:
+#             hot = True
+            
+#         if event.event_type == "down":
+#             if event.name == "shift":
+#                 shiftDown = True
+            
+#             # Only block keys that are part of our hotkey combo
+#             if event.name in check and event.name not in keysDown:
+#                 keysDown.append(event.name)
+#                 return True
+            
+#             # Handle our specific combinations
+#             if hot:
+#                 if event.name == "A" and shiftDown:
+#                     keyboard.write("Ä")
+#                     highlightTarget = gettable[0]
+#                     return False
+#                 elif event.name == "O" and shiftDown:
+#                     keyboard.write("Ö")
+#                     highlightTarget = gettable[1]
+#                     return False
+#                 elif event.name == "a":
+#                     keyboard.write("ä")
+#                     highlightTarget = gettable[2]
+#                     return False
+#                 elif event.name == "o":
+#                     keyboard.write("ö")
+#                     highlightTarget = gettable[3]
+#                     return False
+            
+#             # Let other combinations pass through
+#             return True
+            
+#         if event.event_type == "up":
+#             if event.name == "shift":
+#                 shiftDown = False
+                
+#             if event.name in check:
+#                 if hot and keysDown:
+#                     keysDown.remove(event.name)
+#                     if len(keysDown) == 0:
+#                         hot = False
+#                     return True
+#                 else:
+#                     keysDown.remove(event.name)
+#                     return True
+            
+#             return True
+
+#     except Exception as error:
+#         print(error)
+#         return True
+
+#     return True
+
+
+
 
 def on_key_event(event):
+    # global flag
     global keysDown
+    # global mainFlag
     global hot # hotkey combo active 
-    global shiftDown # shift key flag
-    global gettable # combo
+    global shiftDown
+    global gettable
     global highlightTarget
 
     
@@ -70,55 +162,69 @@ def on_key_event(event):
     print(f"start {event.name}",["shiftdown",shiftDown],["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
 
     try:
+        # kill key for testing 
+        # if event.name == "esc":
+        #     print("esc pressed")
+        #     # mainFlag = False
+        #     # flag = False
+        #     keyboard.unhook_all()
+        #     return False
+        
         if set(keysDown)== {'alt', 'caps lock'}:
             hot = True
             
-        """when keys are pressed"""
+        #when keys are pressed
         if event.event_type == "down":
             if event.name =="shift":
                 shiftDown = True
             
+            #if a key is part of a hotkey combo avoid triggering key press immediately
             if event.name in check and event.name not in keysDown:
                 keysDown.append(event.name)
-                return False
-                       
+                return 
+            
+            
+                
+                      
+            #combos to give letters
             if event.name =="A" and shiftDown and hot:
                 print("should print some umlaut a stuff")
                 keyboard.write("Ä")
                 highlightTarget = gettable[0]
-                return False
-            
+
+                return
             elif event.name == "O"  and shiftDown and hot:
                 print("should print some umlaut o stuff") 
                 keyboard.write("Ö") 
                 highlightTarget = gettable[1]
-                return False
-            
+                return
             elif event.name == "a" and hot:
                 print("should print some (L) umlaut a stuff")
                 keyboard.write("ä")
                 highlightTarget = gettable[2]
-                return False
-            
+
+                return
             elif event.name == "o" and hot:
                 print("should print some (L) umlaut o stuff") 
                 keyboard.write("ö") 
                 highlightTarget = gettable[3]
-                return False
+
+                return
                 
             # other elifs in here 
             else:
-                return True                
+                send_key(event)
+                
         
-        """ when keys are lifted"""
-        # suppress if NKC hotkey was active to stop defaults for keys used in other apps             
+        # when keys are lifted
+        # suppress if hotkey was active             
         if event.event_type == "up":
             if event.name =="shift":
                 shiftDown = False
                 
             if event.name in check:
 
-                if hot and len(keysDown) > 0:
+                if hot and keysDown:
                     print("should avoid triggering normal behaviour")
                     # print(["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
 
@@ -127,19 +233,21 @@ def on_key_event(event):
                         hot = False
                     print(["shiftdown",shiftDown],["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
 
-                    return False
+                    return
                 
                 else: 
                     keysDown.remove(event.name)
-                    keyboard.press(event.name)
 
-                    return True
-          
-            return True      
+                    keyboard.press(event.name)
+                    keyboard.release(event.name)
+                    
+                    # send_key(event)
+            else:
+                send_key(event)       
 
     except Exception as error:
         print(error)
-        return False
+        return
     print("end",["shiftdown",shiftDown],["keysdown",keysDown],["upper", upper], ["hot", hot], sep = "\n")
 
 
