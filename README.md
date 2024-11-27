@@ -13,8 +13,8 @@ This lightweight background application runs using python, pyQT5 keyboard and py
 - 🛠️ Feature 3: Full configurabiltiy coming soon...
 
 ### 🎯 Why Use this project?
-- If you need to work in Nordic languages and have a non nordic keyboard layout
-- If you want to see how to use venv, pyinstaller and pyautoGUI to make exe, GUIs and control keyboard inputs
+- If you need to work in Nordic languages and have a non nordic keyboard layout.
+- If you want to see how to use venv, pyinstaller and pyautoGUI to make exe, GUIs and control keyboard inputs.
 
 ### 🤝 Connect With Me
 <p align="left">
