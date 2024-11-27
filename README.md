@@ -16,6 +16,12 @@ This lightweight background application runs using python, pyQT5 keyboard and py
 - If you need to work in Nordic languages and have a non nordic keyboard layout.
 - If you want to see how to use venv, pyinstaller and pyautoGUI to make exe, GUIs and control keyboard inputs.
 
+### Install/files?
+
+<a href="path-to-release-exe">
+  <img src="https://img.shields.io/badge/Download-Nordic_Keyboard_Converter-blue?style=for-the-badge&logo=windows"/>
+</a>
+
 ### 🤝 Connect With Me
 <p align="left">
 <a href="https://www.linkedin.com/in/nick-griffiths-7b139198/">
@@ -23,6 +29,8 @@ This lightweight background application runs using python, pyQT5 keyboard and py
 </a>
 
 </p>
+
+
 
 ### 📈 Activity Graph
 ![GitHub Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=legriffalo&theme=github)
