@@ -18,7 +18,7 @@ This lightweight background application runs using python, pyQT5 keyboard and py
 
 ### Install/files?
 
-<a href="path-to-release-exe">
+<a href="https://github.com/legriffalo/nordic-keyboard-converter/releases">
   <img src="https://img.shields.io/badge/Download-Nordic_Keyboard_Converter-blue?style=for-the-badge&logo=windows"/>
 </a>
 
